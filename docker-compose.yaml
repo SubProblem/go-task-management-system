@@ -1,0 +1,57 @@
+version: "3.8"
+
+
+services:
+
+  reverse-proxy:
+    image: nginx
+    container_name: reverse-proxy
+    volumes:
+      - ./nginx_config.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8080:80
+    restart: on-failure
+
+  user-db:
+    image: postgres
+    container_name: user-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=user-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    healthcheck:
+      test: ["CMD", "pg_isready -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    # networks:
+    #   - postgres-users
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  task-db:
+    image: postgres
+    container_name: task-db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=task-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    healthcheck:
+      test: ["CMD", "pg_isready -U user"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    # networks:
+    #   - postgres-users
+    volumes:
+      - pg_data2:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
+  pg_data2:
