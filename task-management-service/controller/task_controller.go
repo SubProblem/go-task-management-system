@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"subproblem/management-service/dto"
 	"subproblem/management-service/service"
+
+	"github.com/gorilla/mux"
 )
 
 type TaskController struct {
@@ -47,6 +49,7 @@ func (task *TaskController) GetAllTasksForUserById(w http.ResponseWriter, r *htt
 	w.Write(tasksJson)
 }
 
+
 func (task *TaskController) AddTask(w http.ResponseWriter, r *http.Request) {
 
 	userId := r.Header.Get("X-User-Id")
@@ -78,6 +81,28 @@ func (task *TaskController) AddTask(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+
+func (task *TaskController) CompleteTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	taskId, err1 := strconv.Atoi(vars["taskId"])
+	userId, err2 := strconv.Atoi(vars["userId"])
+
+	if err1 != nil || err2 != nil {
+		http.Error(w, "Incorrect path variable", http.StatusBadRequest)
+		return
+	}
+
+	err := task.service.CompleteTask(taskId, userId)
+	
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	w.WriteHeader(http.StatusOK)
+	return
+}
 
 func (task *TaskController) DeleteTaskById(w http.ResponseWriter, r *http.Request) {
 
