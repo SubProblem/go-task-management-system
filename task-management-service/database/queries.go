@@ -15,7 +15,7 @@ func (pg *PostgresDb) CreateTasksTable() error {
 		user_id INT NOT NULL,
 		task VARCHAR(250) NOT NULL,
 		created_at TIMESTAMP NOT NULL,
-		deadline TIMESTAMP NOT NULL,
+		deadline DATE NOT NULL,
 		completed BOOLEAN NOT NULL 
 		)
 	`
@@ -51,6 +51,34 @@ func (pg *PostgresDb) AddTask(task *models.Task) error {
 	return nil
 
 }
+
+func (pg *PostgresDb) CompleteTask(taskId, userId int) error {
+
+	query := `
+		UPDATE tasks
+		SET completed = 'true'
+		WHERE id = $1 and user_id = $2
+	`
+
+	res, err := pg.db.Exec(query, taskId, userId)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return err
+	}
+
+	return nil
+}
+
 
 func (pg *PostgresDb) GetAllTasksByDeadline() ([]*models.Task, error) {
 
