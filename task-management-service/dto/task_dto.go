@@ -11,6 +11,7 @@ type TaskResponseDto struct {
 	Task      string    `json:"task"`
 	CreatedAt time.Time `json:"createdAt"`
 	Deadline  time.Time `json:"deadline"`
+	Completed bool      `json:"completed"`
 }
 
 type TaskRequestDto struct {
@@ -25,6 +26,7 @@ func ToTaskResponseDto(task *models.Task) *TaskResponseDto {
 		Task:      task.Task,
 		CreatedAt: task.CreatedAt,
 		Deadline:  task.Deadline,
+		Completed: task.Completed,
 	}
 }
 
