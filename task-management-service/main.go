@@ -7,7 +7,6 @@ import (
 	db "subproblem/management-service/database"
 	"subproblem/management-service/service"
 	"subproblem/management-service/util"
-
 	"github.com/gorilla/mux"
 )
 
@@ -26,14 +25,14 @@ func main() {
 	}
 
 	taskService := service.NewTaskService(db)
-	
-	taskService.PrintTasks()
-	
 	taskController := controller.NewTaskController(taskService)
+
+	taskService.CheckDeadline()
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/v1/task", taskController.GetAllTasksForUserById).Methods("GET")
+	router.HandleFunc("/api/v1/task/complete/{taskId}/{userId}", taskController.CompleteTask).Methods("POST")
 	router.HandleFunc("/api/v1/task", taskController.AddTask).Methods("POST")
 	router.HandleFunc("/api/v1/task", taskController.DeleteTaskById).Methods("DELETE")
 
