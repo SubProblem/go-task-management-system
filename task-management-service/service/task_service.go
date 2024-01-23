@@ -11,7 +11,6 @@ type TaskService struct {
 	db database.PostgresDb
 }
 
-
 func NewTaskService(database *database.PostgresDb) *TaskService {
 	return &TaskService{
 		db: *database,
@@ -30,8 +29,19 @@ func (task *TaskService) AddTask(request *dto.TaskRequestDto, userId int) error 
 	}
 
 	return nil
-
 }
+
+func (task *TaskService) CompleteTask(taskId, userId int) error {
+
+	err := task.db.CompleteTask(taskId, userId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 
 func (task *TaskService) GetAllTasksForUserById(id int) ([]*dto.TaskResponseDto, error) {
 
@@ -41,12 +51,11 @@ func (task *TaskService) GetAllTasksForUserById(id int) ([]*dto.TaskResponseDto,
 		return nil, err
 	}
 
-	
 	return dto.ReponsesToList(tasks), nil
 }
 
 func (task *TaskService) DeleteTaskById(id int) (bool, error) {
-	
+
 	ok, err := task.db.DeleteTaskById(id)
 
 	if err != nil {
@@ -60,41 +69,28 @@ func (task *TaskService) DeleteTaskById(id int) (bool, error) {
 	return true, nil
 }
 
+func (task *TaskService) CheckDeadline() {
 
-
-func (task *TaskService) CheckDeadline() error {
-
-	// Retreive Data from Database based on deadline
-
-	users, err := task.db.GetAllTasksByDeadline()
-
-
-	if err != nil {
-		return err
-	}
-
-	for _, t := range users {
-		fmt.Println(t)
-	}
-
-	return nil
-}
-
-func (task *TaskService) PrintTasks() {
 	interval := time.Duration(10) * time.Second
 
 	ticker := time.NewTicker(interval)
 
-
 	go func() {
 		for {
 			select {
-			case <- ticker.C:
-				if err := task.CheckDeadline(); err != nil {
+			case <-ticker.C:
+				tasks, err := task.db.GetAllTasksByDeadline()
+
+				if err != nil {
 					fmt.Println(err)
+					continue
+				}
+
+				for _, t := range tasks {
+					fmt.Println(t)
 				}
 			}
 		}
 	}()
-}
 
+}
