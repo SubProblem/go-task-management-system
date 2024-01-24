@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"subproblem/management-service/database"
 	"subproblem/management-service/dto"
+	"subproblem/management-service/producer"
 	"time"
 )
 
 type TaskService struct {
 	db database.PostgresDb
+	mp *producer.MessageProducer
 }
 
-func NewTaskService(database *database.PostgresDb) *TaskService {
+func NewTaskService(database *database.PostgresDb, producer *producer.MessageProducer) *TaskService {
 	return &TaskService{
 		db: *database,
+		mp: producer,
 	}
 }
 
@@ -41,7 +44,6 @@ func (task *TaskService) CompleteTask(taskId, userId int) error {
 
 	return nil
 }
-
 
 func (task *TaskService) GetAllTasksForUserById(id int) ([]*dto.TaskResponseDto, error) {
 
@@ -88,6 +90,12 @@ func (task *TaskService) CheckDeadline() {
 
 				for _, t := range tasks {
 					fmt.Println(t)
+					msg := &producer.Message{
+						TaskId: t.ID,
+						Task:   t.Task,
+						UserId: t.User_ID,
+					}
+					task.mp.ProduceMessage(msg)
 				}
 			}
 		}
