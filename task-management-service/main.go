@@ -5,8 +5,10 @@ import (
 	"net/http"
 	"subproblem/management-service/controller"
 	db "subproblem/management-service/database"
+	"subproblem/management-service/producer"
 	"subproblem/management-service/service"
 	"subproblem/management-service/util"
+
 	"github.com/gorilla/mux"
 )
 
@@ -24,7 +26,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	taskService := service.NewTaskService(db)
+	kafkaProducer, err := producer.NewKafkaProducer()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	taskService := service.NewTaskService(db, kafkaProducer)
 	taskController := controller.NewTaskController(taskService)
 
 	taskService.CheckDeadline()
