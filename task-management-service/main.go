@@ -39,9 +39,9 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/v1/task", taskController.GetAllTasksForUserById).Methods("GET")
-	router.HandleFunc("/api/v1/task/complete/{taskId}/{userId}", taskController.CompleteTask).Methods("POST")
+	router.HandleFunc("/api/v1/task/complete/{taskId}", taskController.CompleteTask).Methods("POST")
 	router.HandleFunc("/api/v1/task", taskController.AddTask).Methods("POST")
-	router.HandleFunc("/api/v1/task", taskController.DeleteTaskById).Methods("DELETE")
+	router.HandleFunc("/api/v1/task/{taskId}", taskController.DeleteTaskById).Methods("DELETE")
 
 	http.ListenAndServe(":8082", router)
 }
